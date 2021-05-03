@@ -6,9 +6,9 @@ We employed the dataset from the white supremacist Stormfront forum, manually la
 ## Note
 
 The work has been split in 3 pages:
-- \_Pre-processing data\_ in which we cleaned data;
-- \_Data analysis\_ in which we made some descriptive analysis;
-- \_Models\_ in which we porformed different statistic methods on data. 
+- \Pre-processing data\ in which we cleaned data;
+- \Data analysis\ in which we made some descriptive analysis;
+- \Models\ in which we porformed different statistic methods on data. 
 
 ## Usage
 
