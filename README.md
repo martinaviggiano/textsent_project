@@ -7,12 +7,13 @@ We employed the dataset from the white supremacist Stormfront forum, manually la
 ## Note
 
 The work has been split in 3 pages:
-- *Pre-processing data* in which we cleaned data;
-- *Data analysis* in which we made some descriptive analysis;
-- *Models* in which we porformed different statistic methods on data. 
+	1. *Pre-processing data* in which we cleaned data;
+	2. *Data analysis* in which we made some descriptive analysis;
+	3. *Models* in which we porformed different statistic methods on data. 
 
 ## Usage
 
-```python
-
+```bash
+pip install -r requirements.txt
+streamlit run app.py
 ```
