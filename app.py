@@ -47,8 +47,10 @@ def get_data(path):
     data = pickle.load(open(Path(path, "data.pkl"), "rb"))
     vect = pickle.load(open(Path(path, "vect.pkl"), "rb"))
     svc_i = pickle.load(open(Path(path, "svc.pkl"), "rb"))
+    vect_pos = pickle.load(open(Path(path, "vect_pos.pkl"), "rb"))
+    svc_pos = pickle.load(open(Path(path, "svc_pos.pkl"), "rb"))
 
-    return data, vect, svc_i
+    return data, vect, svc_i, vect_pos, svc_pos
     
 
 # Classification functions
@@ -109,9 +111,9 @@ def full_text_clean(text):
         .replace(r" +", " ")
         )
     
-    bb = " ".join([i for i in bb.split() if not i in swords])
+    cc = " ".join([i for i in cc.split() if not i in swords])
     
-    return bb
+    return cc
 
 
 def hate_predict(X, vect, clf):
@@ -120,10 +122,20 @@ def hate_predict(X, vect, clf):
     classification = clf.predict(X_new)
     return classification
 
+#def select(column):
+#    if column in data.columns:
+       
+ 
 # Pages
 def load_homepage(data):
+    or_data = data[["label" , "text"]]
     with st.beta_expander("Show original data"):
-        st.write(data)
+        st.write(or_data)
+    with st.beta_expander("Select columns to display"):
+        selected_col = st.multiselect("Select Columns", data.columns)
+        a_data = data[['text']]
+        #if selected_col in data.columns:
+        st.write(selected_col)
 
 
 def load_eda(data):
@@ -199,15 +211,15 @@ def load_eda(data):
         st.image(total_cloud, caption='Top 20 of all the parts of speech in Hate Speech sentences')
 
 
-def load_classif(data, vect, svc_i):
-    written = st.text_input('Write your sentence here')
+def load_classif_under(data, vect, svc_i):
+    written_under = st.text_input('Write your sentence here', 'I hate nobody' , key = '1')
         
-    if not written:
+    if not written_under:
         warn_lbl = st.warning('Please write the sentence you want to test')
 
-    if written:
+    if written_under:
         warn_lbl = st.empty()
-        pred = hate_predict([written], vect, svc_i)
+        pred = hate_predict([written_under], vect, svc_i)
 
         if pred == 0:
             prediction = 'NOT HATE SPEECH'
@@ -217,6 +229,27 @@ def load_classif(data, vect, svc_i):
             color = 'red'
      
         st.markdown(f'The sentence has been classified as: <span style="color:{color}">**{prediction}**</span>', unsafe_allow_html=True)
+
+
+def load_classif_pos(data, vect_pos, svc_pos):
+    written_pos = st.text_input('Write your sentence here', 'I hate nobody' , key = '2')
+        
+    if not written_pos:
+        warn_lbl = st.warning('Please write the sentence you want to test')
+
+    if written_pos:
+        warn_lbl = st.empty()
+        pred = hate_predict([written_pos], vect_pos, svc_pos)
+
+        if pred == 0:
+            prediction = 'NOT HATE SPEECH'
+            color = 'green'
+        else:
+            prediction = 'HATE SPEECH'
+            color = 'red'
+     
+        st.markdown(f'The sentence has been classified as: <span style="color:{color}">**{prediction}**</span>', unsafe_allow_html=True)
+
 
 
 def main():
@@ -230,14 +263,17 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, svc_i = get_data(DATA_PATH)
+    data, vect, svc_i, vect_pos, svc_pos = get_data(DATA_PATH)
     
     if app_mode == "Homepage":
         load_homepage(data)
     elif app_mode == "Data Exploration":
         load_eda(data)
     elif app_mode == "Classification":
-        load_classif(data, vect, svc_i)
+        st.subheader("Model with Undersampled data")
+        load_classif_under(data, vect, svc_i)
+        st.subheader("Model containing only some parts of speech")
+        load_classif_pos(data, vect_pos, svc_pos)
 
 
 if __name__ == "__main__":
