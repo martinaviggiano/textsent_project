@@ -44,6 +44,7 @@ def get_data(path):
     A tuple with the data pd.DataFrame, the TfidfVectorizer
     and the SVC fitted model.
     """
+    
     data = pickle.load(open(Path(path, "data.pkl"), "rb"))
     vect = pickle.load(open(Path(path, "vect.pkl"), "rb"))
     svc_i = pickle.load(open(Path(path, "svc.pkl"), "rb"))
@@ -108,8 +109,7 @@ def full_text_clean(text):
         .replace(r"ghlight", " ")
         .replace(r"[0-9]+(?:st| st|nd| nd|rd| rd|th| th)", " ")
         .replace(r"([^a-z \t])", " ")
-        .replace(r" +", " ")
-        )
+        .replace(r" +", " "))
     
     cc = " ".join([i for i in cc.split() if not i in swords])
     
@@ -120,10 +120,8 @@ def hate_predict(X, vect, clf):
     lista_pulita = [full_text_clean(text) for text in X]
     X_new = vect.transform(lista_pulita)
     classification = clf.predict(X_new)
+    
     return classification
-
-#def select(column):
-#    if column in data.columns:
        
  
 # Pages
@@ -133,9 +131,7 @@ def load_homepage(data):
         st.write(or_data)
     with st.beta_expander("Select columns to display"):
         selected_col = st.multiselect("Select Columns", data.columns)
-        a_data = data[['text']]
-        #if selected_col in data.columns:
-        st.write(selected_col)
+        st.write(data.loc[:,selected_col])
 
 
 def load_eda(data):
@@ -153,6 +149,19 @@ def load_eda(data):
     noun = Image.open('images_d/wc_n_hate.png')
     propn = Image.open('images_d/wc_p_hate.png')
     total_cloud = Image.open('images_d/wc_tot_hate.png')
+    
+    st.header("Original data")
+    st.write("""
+    You can choose which columns and label to display. Remember:
+
+    - 0 = No Hate Speech
+    - 1 = Hate Speech
+    """)
+    selected_col = st.multiselect("Select Columns", list(data.columns.values), list(data.columns.values))
+    selected_lab = st.selectbox("Select Label", ["Hate Speech", "Non Hate Speech"])
+    selected_lab_val = 1 if selected_lab == "Hate Speech" else 0
+
+    st.write(data.loc[data['label'] == selected_lab_val, selected_col])
 
     st.header("Plot Section")
 
@@ -192,10 +201,6 @@ def load_eda(data):
         st.write(data.loc[data['label'] == 1])
         
 
-        
-    #if 0 in selected_sex and 1 in selected_sex:
-    #    st.write(data)
-
 
     st.subheader("Top words in WordCloud")
     st.write("You can choose which Part of Speech to display")
@@ -210,7 +215,7 @@ def load_eda(data):
     if "All of them" in selected_pos:
         st.image(total_cloud, caption='Top 20 of all the parts of speech in Hate Speech sentences')
 
-
+####
 def load_classif_under(data, vect, svc_i):
     written_under = st.text_input('Write your sentence here', 'I hate nobody' , key = '1')
         
