@@ -35,12 +35,14 @@ def plot_word_hist(data, template="plotly"):
     fig.add_trace(
         go.Histogram(
             x=data.word_count_before.values,
+            marker_color="royalblue",
             name="Before cleaning",
         )
     )
     fig.add_trace(
         go.Histogram(
             x=data.word_count.values,
+            marker_color="lightblue",
             name="After cleaning",
         )
     )
@@ -69,6 +71,7 @@ def plot_most_common_words(df, template="plotly"):
             x=X,
             y=Y,
             hovertemplate="Word: %{x} <br>Count: %{y}",
+            marker_color= "royalblue",
         )
     )
 
@@ -76,7 +79,7 @@ def plot_most_common_words(df, template="plotly"):
         title="Top 20 most common Words in the entire dataset ",
         xaxis_title="Word",
         yaxis_title="Count",
-        xaxis_tickangle=-90,
+        xaxis_tickangle=290,
         template=template,
     )
 
@@ -109,7 +112,7 @@ def plot_top_20_pos(df, x_col="", title="", template="plotly"):
         ),
         secondary_y=True,
     )
-    fig.update_xaxes(title_text=x_col)
+    fig.update_xaxes(title_text=x_col, tickangle = 290)
     fig.update_yaxes(title_text="Count", secondary_y=False)
 
     fig.update_layout(
