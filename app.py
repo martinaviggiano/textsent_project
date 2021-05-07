@@ -1,3 +1,9 @@
+from plots import (
+    plot_freq_labels,
+    plot_most_common_words,
+    plot_top_20_pos,
+    plot_word_hist,
+)
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -23,9 +29,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 DATA_PATH = 'serialized'
 
 
-st.set_page_config(
-    page_title="Hate speech detection", page_icon="🔤", layout="centered"
-)
+st.set_page_config( page_title="Hate speech detection", page_icon="🔤", layout="centered")
 
 
 # My custom functions
@@ -50,8 +54,13 @@ def get_data(path):
     svc_i = pickle.load(open(Path(path, "svc.pkl"), "rb"))
     vect_pos = pickle.load(open(Path(path, "vect_pos.pkl"), "rb"))
     log_pos = pickle.load(open(Path(path, "log_pos.pkl"), "rb"))
+    
+    mcw = pickle.load(open(Path(path, "mcw.pkl"), "rb"))
+    top20adj = pickle.load(open(Path(path, "top20adj.pkl"), "rb"))
+    top20noun = pickle.load(open(Path(path, "top20noun.pkl"), "rb"))
+    top20propn = pickle.load(open(Path(path, "top20propn.pkl"), "rb"))
 
-    return data, vect, svc_i, vect_pos, log_pos
+    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn
     
 
 # Classification functions
@@ -157,7 +166,7 @@ def load_homepage(data):
     ''', unsafe_allow_html = True)
     
    
-def load_eda(data):
+def load_eda(data, mcw, top20adj, top20noun, top20propn):
     # IMAGES Data Analysis
     freq_label = Image.open('images_d/Freq_labels.png')
     words_b_a = Image.open('images_d/Words_before_after.png')
@@ -194,28 +203,61 @@ def load_eda(data):
 
     st.write("You can click on buttons below to display plots and explore data.")
 
-    st.write("Select the plot to display by clicking on one of the following buttons:")
+    st.write("Select the plots to display by clicking on the corresponding buttons:")
+    
+    with st.beta_expander("Labels frequency"):
+        # Choose a template among:
+        #   "plotly", "plotly_white", "plotly_dark",
+        #   "ggplot2", "seaborn", "simple_white", "none"
+        st.plotly_chart(
+            plot_freq_labels(data, template="plotly_white"), use_container_width=True
+        )
 
-    if st.button('Frequency per Label'):
-        st.image(freq_label, caption='Frequency per Label')
+    with st.beta_expander("Word Counts"):
+        st.plotly_chart(
+            plot_word_hist(data, template="plotly_white"), use_container_width=True
+        )
+
+    with st.beta_expander("Top 20 Words"):
+        st.plotly_chart(
+            plot_most_common_words(mcw, template="plotly_white"),
+            use_container_width=True,
+        )
+
+    with st.beta_expander("Top 20 Adjectives"):
+        st.plotly_chart(
+            plot_top_20_pos(
+                top20adj,
+                x_col="Adj",
+                title="Frequency of Top 20 Adjectives in Hate Speech and neutral sentences",
+                template="plotly_white",
+            ),
+            use_container_width=True,
+        )
+
+    with st.beta_expander("Top 20 Nouns"):
+        st.plotly_chart(
+            plot_top_20_pos(
+                top20noun,
+                x_col="Nouns",
+                title="Frequency of Top 20 Nouns in Hate Speech and neutral sentences",
+                template="plotly_white",
+            ),
+            use_container_width=True,
+        )
+
+    with st.beta_expander("Top 20 Proper Nouns"):
+        st.plotly_chart(
+            plot_top_20_pos(
+                top20propn,
+                x_col="Proper Nouns",
+                title="Frequency of Top 20 Proper Nouns in Hate Speech and neutral sentences",
+                template="plotly_white",
+            ),
+            use_container_width=True,
+        )
         
-    if st.button('Word Counts'):
-        st.image(words_b_a, caption='Count of Words before and after cleanining')
         
-    if st.button('Top 20 Words'):
-        st.image(top20_words, caption='Top 20 most common Words in the entire dataset')
-
-    if st.button('Top 20 Adjectives'):
-        st.image(top20_adjs, caption='Differences in frequency betweeen common Adjectives in Hate Speech and neutral sentences')
-
-    if st.button('Top 20 Nouns'):
-        st.image(top20_nouns, caption='Differences in frequency betweeen common Nouns in Hate Speech and neutral sentences')
-
-    if st.button('Top 20 Proper Nouns'):
-        st.image(top20_propns, caption='Differences in frequency betweeen common Proper Nouns in Hate Speech and neutral sentences')
-
-    if st.button('Top 20 Verbs'):
-        st.image(top20_verbs, caption='Differences in frequency betweeen common Verbs in Hate Speech and neutral sentences')
 
     st.markdown("---", unsafe_allow_html=True)
 
@@ -223,7 +265,7 @@ def load_eda(data):
     
     st.write("In this section you can choose to display one or more cloud of words plots.")
     st.write("You can choose between the cloud containing the 20 most common words for four parts of speech (Nouns, Proper Nouns, Adjectives and Verbs) or the plot that displays all of them together.")
-    selected_pos = st.multiselect("Select the Part of Speech", ["Adjectives", "Nouns" , "Proper Nouns", "Verbs", "All of them"])
+    selected_pos = st.multiselect("Select the part of speech:", ["Adjectives", "Nouns" , "Proper Nouns", "Verbs", "All of them"])
     st.write(f"Selected Option:  {selected_pos!r}")
     if "Adjectives" in selected_pos:
         st.image(adj, caption='Top 20 Adjectives in Hate Speech sentences')
@@ -328,12 +370,12 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, svc_i, vect_pos, log_pos = get_data(DATA_PATH)
+    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn = get_data(DATA_PATH)
     
     if app_mode == "Homepage":
         load_homepage(data)
     elif app_mode == "Data Exploration":
-        load_eda(data)
+        load_eda(data, mcw, top20adj, top20noun, top20propn)
     elif app_mode == "Classification":
         load_classif(data, vect, svc_i, vect_pos, log_pos)
 
