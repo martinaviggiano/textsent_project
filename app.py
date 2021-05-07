@@ -60,8 +60,9 @@ def get_data(path):
     top20noun = pickle.load(open(Path(path, "top20noun.pkl"), "rb"))
     top20propn = pickle.load(open(Path(path, "top20propn.pkl"), "rb"))
     top20verb = pickle.load(open(Path(path, "top20verb.pkl"), "rb"))
+    top_pos = pickle.load(open(Path(path, "top_pos.pkl"), "rb"))
 
-    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb
+    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos
     
 
 # Classification functions
@@ -167,7 +168,7 @@ def load_homepage(data):
     ''', unsafe_allow_html = True)
     
    
-def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb):
+def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
     # IMAGES Data Analysis
     freq_label = Image.open('images_d/Freq_labels.png')
     words_b_a = Image.open('images_d/Words_before_after.png')
@@ -268,6 +269,9 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb):
             ),
             use_container_width=True,
         )
+        
+    with st.beta_expander("Top POS"):
+        st.dataframe(top_pos)
         
         
 
@@ -382,12 +386,12 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb = get_data(DATA_PATH)
+    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos = get_data(DATA_PATH)
     
     if app_mode == "Homepage":
         load_homepage(data)
     elif app_mode == "Data Exploration":
-        load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb)
+        load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos)
     elif app_mode == "Classification":
         load_classif(data, vect, svc_i, vect_pos, log_pos)
 
