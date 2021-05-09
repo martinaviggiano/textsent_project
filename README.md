@@ -18,4 +18,4 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/martinaviggiano/textsent_project/app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/martinaviggiano/textsent_project/app.py)
