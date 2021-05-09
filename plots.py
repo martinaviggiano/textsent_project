@@ -71,7 +71,7 @@ def plot_most_common_words(df, template="plotly"):
             x=X,
             y=Y,
             hovertemplate="Word: %{x} <br>Count: %{y}",
-            marker_color= "royalblue",
+            marker_color="royalblue",
         )
     )
 
@@ -114,6 +114,45 @@ def plot_top_20_pos(df, x_col="", title="", template="plotly"):
     )
     fig.update_xaxes(title_text=x_col, tickangle = 290)
     fig.update_yaxes(title_text="Count", secondary_y=False)
+
+    fig.update_layout(
+        title=title, template=template, yaxis2=dict(overlaying="y", side="right")
+    )
+
+    fig.update_layout(barmode="group")
+
+    return fig
+
+def plot_top_pos_general(df, x_col=None, y_col=None, title="", template="plotly"):
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Bar(
+            x=df[x_col[0]],
+            y=df[y_col[0]],
+            name=x_col[0],
+            yaxis="y",
+            offsetgroup=1,
+            marker_color="lightblue",
+            hovertemplate="<b>Total</b><br>POS: %{x} <br>Rel. freq.: %{y}",
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Bar(
+            x=df[x_col[1]],
+            y=df[y_col[1]],
+            name=x_col[1],
+            yaxis="y2",
+            offsetgroup=2,
+            marker_color="royalblue",
+            hovertemplate="<b>Hate Speech</b><br>POS: %{x} <br>Rel. freq.: %{y}",
+        ),
+        secondary_y=True,
+    )
+    fig.update_xaxes(title_text="POS", tickangle=290)
+    fig.update_yaxes(title_text="Relative Frequency", secondary_y=False)
 
     fig.update_layout(
         title=title, template=template, yaxis2=dict(overlaying="y", side="right")

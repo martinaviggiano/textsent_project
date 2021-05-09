@@ -1,27 +1,23 @@
+import os
+import pickle
+import re
+import string
+from pathlib import Path
+
+import preprocessor as pproc
+import spacy
+import streamlit as st
+from cleantext import clean
+from PIL import Image
+from tensorflow.python.keras.utils.vis_utils import plot_model
+
 from plots import (
     plot_freq_labels,
     plot_most_common_words,
     plot_top_20_pos,
-    plot_word_hist,
+    plot_top_pos_general,
+    plot_word_hist
 )
-import streamlit as st
-import pandas as pd
-import numpy as np
-import pickle
-import time
-from PIL import Image
-import re
-import preprocessor as pproc
-from cleantext import clean
-import string
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
-import spacy
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import SVC
-
-import os
-from pathlib import Path
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -29,7 +25,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 DATA_PATH = 'serialized'
 
 
-st.set_page_config( page_title="Hate speech detection", page_icon="🔤", layout="centered")
+st.set_page_config(page_title="Hate speech detection", page_icon="🔤", layout="centered")
 
 
 # My custom functions
@@ -65,7 +61,13 @@ def get_data(path):
     return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos
     
 
+@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+def load_spacy_model():
+    return spacy.load("en_core_web_sm")
+    
 # Classification functions
+
+
 def expand_contractions(text):
     cList = {
         "n't": " not",
@@ -86,7 +88,7 @@ def expand_contractions(text):
     return c_re.sub(lambda match: cList[match.group(0)], text)
 
 
-def full_text_clean(text):
+def full_text_clean(text, nlp, filter_pos):
     aa = expand_contractions(text)
     
     bb = pproc.clean(
@@ -106,8 +108,7 @@ def full_text_clean(text):
             replace_with_url=" ",
             replace_with_email=" ")
     )
-    
-    swords = string.punctuation
+
 
     cc = (
         bb.lower()
@@ -125,13 +126,27 @@ def full_text_clean(text):
         .replace(r" +", " ")
         .replace(r"http", " "))
     
-    cc = " ".join([i for i in cc.split() if i not in swords]) ###############
+    cc = " ".join([i for i in cc.split() if i not in string.punctuation and len(i) > 1]) ###############
     
-    return cc
+    doc = nlp(cc)
+    if filter_pos:
+        return filter_text_pos(doc)
+    else:
+        return " ".join([y.lemma_ for y in doc if len(y) > 1])
+        
+
+def filter_text_pos(x):
+    final_pos_text = []
+    for elem in x:
+        for pos in ["NOUN", "PROPN", "VERB", "ADJ", "PRON", "SCONJ", "ADP", "CCONJ", "X"]:
+            if elem.pos_ == pos:
+                final_pos_text.append(elem.text)
+
+    return " ".join(final_pos_text)
 
 
-def hate_predict(X, vect, clf):
-    lista_pulita = [full_text_clean(text) for text in X]
+def hate_predict(X, vect, clf, nlp, filter_pos):
+    lista_pulita = [full_text_clean(text, nlp, filter_pos) for text in X]
     X_new = vect.transform(lista_pulita)
     classification = clf.predict(X_new)
     
@@ -142,44 +157,34 @@ def hate_predict(X, vect, clf):
 def load_homepage(data):
     st.markdown('''
     This dashboard is used to display the preliminary analysis and the results of Sentiment Analysis module project: the goal of the study is to <strong>classify text contents as hate speech</strong> or not.
-    
+
     The dataset considered in the study contains textual data extracted from <em>Stormfront</em>, a white supremacist forum.
-    
+
     In particular, data were taken from the Github repository <em>hate-speech-dataset</em> by Vicomtech, in which a list of sentences from a random set of forums posts is provided.
-    
+
     A few number of variables are assigned to each of the sentences, including the label of interest: for every sentence, the dataset provides the column <em>label</em> which shows whether it has been classified as hate speech (1) or not hate speech (0).
-    
+
     The first step was to clean deeply textual data; we faced some difficulties working with this dataset, since it turned out to be full of contractions and _ that created some bias, so had to be removed.
-    
-    After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence calssified as hate speech.
-    
-    Last thing was to employ various supervised statistical methods, training them of a set of data. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
+
+    After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
+
+    Last thing was to employ various supervised statistical methods, training them on various modification of this dataset. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
     In particular, they are a <strong>support vector machine</strong> model over a sample of the data balanced with respect to labels and the second one is a <strong>logistic regression</strong> over balanced data but considering only words beloning to specific parts of speech (nouns, proper nouns, verbs, adjectives, pronouns, subordinating conjunction, coordinating conjunction, "other" defined by spacy).
-    
+
     ---
-    
+
     In this dashboard you can find three pages: Homepage, Data Exploration, Classification.
-    
+
     You are currently on the <strong>Homepage</strong>. :smile:
-    
+
     On <strong>Data Exploration</strong> page you can use interactive tools to display plots and visualize data.
-    
+
     On <strong>Classification</strong> page you can take advantage of the two trained model described above by writing a sentence on which you want to test the classification accuracy.
     ''', unsafe_allow_html = True)
     
    
 def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
     # IMAGES Data Analysis
-    freq_label = Image.open('images_d/Freq_labels.png')
-    words_b_a = Image.open('images_d/Words_before_after.png')
-
-    top20_words = Image.open('images_d/Top20_words.png')
-    top20_adjs = Image.open('images_d/Adj_tot_hate.png')
-    top20_nouns = Image.open('images_d/ Noun_tot_hate.png')
-    top20_propns = Image.open('images_d/Propn_tot_hate.png')
-    top20_verbs = Image.open('images_d/Verb_tot_hate.png')
-
-
     adj = Image.open('images_d/wc_a_hate.png')
     noun = Image.open('images_d/wc_n_hate.png')
     propn = Image.open('images_d/wc_p_hate.png')
@@ -193,8 +198,10 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
     st.write("Here you can build the data table by selecting columns and class of the label you want to display below.")
     st.write("At the bottom of this page you can find the legend explaining what each column contains.")
     
-    selected_col = st.multiselect( "Select columns:", list(data.columns.values), list(data.columns.values))
-    selected_lab = st.selectbox("Select the label:", ["Hate Speech", "Not Hate Speech"])
+    selected_col = st.multiselect("Select columns:", list(
+        data.columns.values), list(data.columns.values))
+    selected_lab = st.selectbox(
+        "Select the label:", ["Hate Speech", "Not Hate Speech"])
     selected_lab_val = 1 if selected_lab == "Hate Speech" else 0
 
     st.write(data.loc[data['label'] == selected_lab_val, selected_col])
@@ -272,6 +279,15 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
         
     with st.beta_expander("Top POS"):
         st.dataframe(top_pos)
+        st.plotly_chart(
+            plot_top_pos_general(
+                top_pos,
+                x_col=["Total", "Hate_Speech"],
+                y_col=["R_Freq_Total", "R_Freq_Hate"],
+                title="Top POS",
+                template="plotly_white"
+            )
+        )
         
         
 
@@ -323,21 +339,22 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
     - <em>SCONJ_count</em> = Number of subordinating conjunction in the sentence;
     - <em>INTJ</em> = List of interjection in the sentence;
     - <em>INTJ_count</em> = Number of interjection in the sentence;    
-    
     ''', unsafe_allow_html=True)
         
 
-def load_classif(data, vect, svc_i, vect_pos, log_pos):
+def load_classif(data, vect, svc_i, vect_pos, log_pos, nlp):
     st.write('''
-    On this page you can test two of the models that have been trained for the project:
+    On this page you can test two of the models that have been trained for the project.
     
-    1. Support vector machine modelled on data balanced with RandomUnderSampler;
-    2. Logistic regression over data including only some parts of speech.
+    In both cases, the lables were balanced with RandomUnderSampler.
+    
+    1. Support Vector Machine trained on lemmatized text;
+    2. Logistic Regression over data including only some parts of speech.
     ''')
     
     st.write("To do so, you need to write down the sentence you want to test in the board below.")
     
-    st.write("As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the second method performs better the classification between Hate Speech and Not Hate Speech.")
+    #st.write("As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the second method performs better the classification between Hate Speech and Not Hate Speech.")
     
     
     written_sent = st.text_input('Write your sentence here:', "I don't think I am racist, but I hate blacks!")
@@ -350,17 +367,23 @@ def load_classif(data, vect, svc_i, vect_pos, log_pos):
         if warn_lbl is not None:
             warn_lbl = st.empty()
 
-        pred_under = hate_predict([written_sent], vect, svc_i)
-        pred_pos = hate_predict([written_sent], vect_pos, log_pos)
+        pred_under = hate_predict(
+            [written_sent], vect, svc_i, nlp, filter_pos=False)
+        pred_pos = hate_predict(
+            [written_sent], vect_pos, log_pos, nlp, filter_pos=True)
 
         prediction_under, color_under = get_text_color(pred_under)
         prediction_pos, color_pos = get_text_color(pred_pos)
 
-        st.markdown("<h3><strong>Model with Undersampled data</strong></h3>", unsafe_allow_html = True)
-        st.markdown(f'The sentence has been classified as: <span style="color:{color_under}">**{prediction_under}**</span>', unsafe_allow_html=True)
+        st.markdown(
+            "<h3><strong>Model with Undersampled data</strong></h3>", unsafe_allow_html=True)
+        st.markdown(
+            f'The sentence has been classified as: <span style="color:{color_under}">**{prediction_under}**</span>', unsafe_allow_html=True)
 
-        st.markdown("<h3><strong>Model containing only some Parts of speech</h3></strong>", unsafe_allow_html= True)
-        st.markdown(f'The sentence has been classified as: <span style="color:{color_pos}">**{prediction_pos}**</span>', unsafe_allow_html=True)
+        st.markdown(
+            "<h3><strong>Model containing only some Parts of speech</h3></strong>", unsafe_allow_html=True)
+        st.markdown(
+            f'The sentence has been classified as: <span style="color:{color_pos}">**{prediction_pos}**</span>', unsafe_allow_html=True)
 
 
 def get_text_color(pred):
@@ -387,13 +410,14 @@ def main():
     )
     
     data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos = get_data(DATA_PATH)
+    nlp = load_spacy_model()
     
     if app_mode == "Homepage":
         load_homepage(data)
     elif app_mode == "Data Exploration":
         load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos)
     elif app_mode == "Classification":
-        load_classif(data, vect, svc_i, vect_pos, log_pos)
+        load_classif(data, vect, svc_i, vect_pos, log_pos, nlp)
 
 if __name__ == "__main__":
     main()

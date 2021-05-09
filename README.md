@@ -17,3 +17,5 @@ The work has been split in 3 pages:
 pip install -r requirements.txt
 streamlit run app.py
 ```
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/martinaviggiano/textsent_project/app.py/)
