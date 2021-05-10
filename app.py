@@ -164,7 +164,7 @@ def load_homepage(data):
 
     A few number of variables are assigned to each of the sentences, including the label of interest: for every sentence, the dataset provides the column <em>label</em> which shows whether it has been classified as hate speech (1) or not hate speech (0).
 
-    The first step was to clean deeply textual data; we faced some difficulties working with this dataset, since it turned out to be full of contractions and _ that created some bias, so had to be removed.
+    The first step was to clean deeply textual data; we faced some difficulties working with this dataset, since it turned out to be full of contractions and entities that created some bias, so had to be removed.
 
     After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
 
