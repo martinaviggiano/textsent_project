@@ -92,7 +92,7 @@ def plot_top_20_pos(df, x_col="", title="", template="plotly"):
     fig.add_trace(
         go.Bar(
             x=df[x_col],
-            y=df.Freq_Tot,
+            y=df.Freq_No_Hate,
             name="Freq. tot.",
             yaxis="y",
             offsetgroup=1,

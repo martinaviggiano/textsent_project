@@ -282,8 +282,8 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
         st.plotly_chart(
             plot_top_pos_general(
                 top_pos,
-                x_col=["Total", "Hate_Speech"],
-                y_col=["R_Freq_Total", "R_Freq_Hate"],
+                x_col=["No_Hate", "Hate_Speech"],
+                y_col=["R_Freq_No_Hate", "R_Freq_Hate"],
                 title="Top POS",
                 template="plotly_white"
             )
@@ -350,14 +350,15 @@ def load_classif(data, vect, svc_i, vect_pos, log_pos, nlp):
     
     1. Support Vector Machine trained on lemmatized text;
     2. Logistic Regression over data including only some parts of speech.
+    
     ''')
     
     st.write("To do so, you need to write down the sentence you want to test in the board below.")
     
-    #st.write("As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the second method performs better the classification between Hate Speech and Not Hate Speech.")
+    st.write("As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the first method performs better in terms of classification between Hate Speech and Not Hate Speech.")
     
     
-    written_sent = st.text_input('Write your sentence here:', "I don't think I am racist, but I hate blacks!")
+    written_sent = st.text_input('Write your sentence here:', "I hate all of you!")
 
     warn_lbl = st.empty()
     if not written_sent:
