@@ -215,10 +215,7 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
     st.write("Select the plots to display by clicking on the corresponding buttons:")
     
     with st.beta_expander("Labels frequency"):
-        # Choose a template among:
-        #   "plotly", "plotly_white", "plotly_dark",
-        #   "ggplot2", "seaborn", "simple_white", "none"
-        st.plotly_chart(
+         st.plotly_chart(
             plot_freq_labels(data, template="plotly_white"), use_container_width=True
         )
 
