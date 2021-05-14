@@ -56,9 +56,14 @@ def get_data(path):
     top20noun = pickle.load(open(Path(path, "top20noun.pkl"), "rb"))
     top20propn = pickle.load(open(Path(path, "top20propn.pkl"), "rb"))
     top20verb = pickle.load(open(Path(path, "top20verb.pkl"), "rb"))
-    top_pos = pickle.load(open(Path(path, "top_pos.pkl"), "rb"))
+    top_words = pickle.load(open(Path(path, "top20verb.pkl"), "rb"))
+    top_adj = pickle.load(open(Path(path, "top_adj_df.pkl"), "rb"))
+    top_noun = pickle.load(open(Path(path, "top_noun_df.pkl"), "rb"))
+    top_propn = pickle.load(open(Path(path, "top_propn_df.pkl"), "rb"))
+    top_verb = pickle.load(open(Path(path, "top_verb_df.pkl"), "rb"))
+    top_pos = pickle.load(open(Path(path, "top_pos_df.pkl"), "rb"))
 
-    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos
+    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos
     
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
@@ -183,7 +188,7 @@ def load_homepage(data):
     ''', unsafe_allow_html = True)
     
    
-def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
+def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos):
     # IMAGES Data Analysis
     adj = Image.open('images_d/wc_a_hate.png')
     noun = Image.open('images_d/wc_n_hate.png')
@@ -219,63 +224,62 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
             plot_freq_labels(data, template="plotly_white"), use_container_width=True
         )
 
-    with st.beta_expander("Word Counts"):
+    with st.beta_expander("Word Counts plot"):
         st.plotly_chart(
             plot_word_hist(data, template="plotly_white"), use_container_width=True
         )
 
-    with st.beta_expander("Top 20 Words"):
+    with st.beta_expander("Top Words plot"):
         st.plotly_chart(
             plot_most_common_words(mcw, template="plotly_white"),
             use_container_width=True,
         )
 
-    with st.beta_expander("Top 20 Adjectives"):
+    with st.beta_expander("Top Adjectives plot"):
         st.plotly_chart(
             plot_top_20_pos(
                 top20adj,
                 x_col="Adj",
-                title="Frequency of Top 20 Adjectives in Hate Speech and total sentences",
+                title="Frequency of interjection of Top 20 Adjectives in Hate Speech and neutral sentences",
                 template="plotly_white",
             ),
             use_container_width=True,
         )
 
-    with st.beta_expander("Top 20 Nouns"):
+    with st.beta_expander("Top Nouns"):
         st.plotly_chart(
             plot_top_20_pos(
                 top20noun,
                 x_col="Nouns",
-                title="Frequency of Top 20 Nouns in Hate Speech and total sentences",
+                title="Frequency of interjection of Top 20 Nouns in Hate Speech and neutral sentences",
                 template="plotly_white",
             ),
             use_container_width=True,
         )
 
-    with st.beta_expander("Top 20 Proper Nouns"):
+    with st.beta_expander("Top Proper Nouns"):
         st.plotly_chart(
             plot_top_20_pos(
                 top20propn,
                 x_col="Proper Nouns",
-                title="Frequency of Top 20 Proper Nouns in Hate Speech and total sentences",
+                title="Frequency of interjection of Top 20 Proper Nouns in Hate Speech and neutral sentences",
                 template="plotly_white",
             ),
             use_container_width=True,
         )
     
-    with st.beta_expander("Top 20 Verbs"):
+    with st.beta_expander("Top Verbs"):
         st.plotly_chart(
             plot_top_20_pos(
                 top20verb,
                 x_col="Verb",
-                title="Frequency of Top 20 Verbs in Hate Speech and total sentences",
+                title="Frequency of interjection of Top 20 Verbs in Hate Speech and neutral sentences",
                 template="plotly_white",
             ),
             use_container_width=True,
         )
         
     with st.beta_expander("Top POS"):
-        st.dataframe(top_pos)
         st.plotly_chart(
             plot_top_pos_general(
                 top_pos,
@@ -286,7 +290,28 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos):
             )
         )
         
+
+    
+    st.write("Select the tables to display by clicking on the corresponding buttons:")
+    
+    with st.beta_expander("Top 20 Words table"):
+        st.dataframe(top_words)
+
+    with st.beta_expander("Top 20 Adjectives table"):
+        st.dataframe(top_adj)
+
+    with st.beta_expander("Top 20 Nouns table"):
+        st.dataframe(top_noun)
+
+    with st.beta_expander("Top 20 Proper Nouns table"):
+        st.dataframe(top_propn)
+    
+    with st.beta_expander("Top 20 Verbs table"):
+        st.dataframe(top_verb)
         
+    with st.beta_expander("Top POS table"):
+        st.dataframe(top_pos)
+                
 
     st.markdown("---", unsafe_allow_html=True)
 
@@ -407,13 +432,13 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_pos = get_data(DATA_PATH)
+    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos = get_data(DATA_PATH)
     nlp = load_spacy_model()
     
     if app_mode == "Homepage":
         load_homepage(data)
     elif app_mode == "Data Exploration":
-        load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_pos)
+        load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos)
     elif app_mode == "Classification":
         load_classif(data, vect, svc_i, vect_pos, log_pos, nlp)
 
