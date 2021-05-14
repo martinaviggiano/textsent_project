@@ -330,7 +330,7 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, t
     if "Verbs" in selected_pos:
         st.image(verb, caption='Top 20 Verbs in Hate Speech sentences')
     if "All of them" in selected_pos:
-        st.image(total_cloud, caption='Top 20 of all the parts of speech in Hate Speech sentences')
+        st.image(total_cloud, caption='Collection of top 20 words for adjectives, names, proper names and verbs in Hate Speech sentences')
         
     st.markdown("---")
     st.markdown("<h3><strong>Legend</h3></strong>", unsafe_allow_html=True)
