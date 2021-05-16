@@ -47,9 +47,9 @@ def get_data(path):
     
     data = pickle.load(open(Path(path, "data.pkl"), "rb"))
     vect = pickle.load(open(Path(path, "vect.pkl"), "rb"))
-    svc_i = pickle.load(open(Path(path, "svc.pkl"), "rb"))
-    vect_pos = pickle.load(open(Path(path, "vect_pos.pkl"), "rb"))
-    log_pos = pickle.load(open(Path(path, "log_pos.pkl"), "rb"))
+    log_i = pickle.load(open(Path(path, "log_i.pkl"), "rb"))
+    vect_pos1 = pickle.load(open(Path(path, "vect_pos1.pkl"), "rb"))
+    svc_pos1 = pickle.load(open(Path(path, "svc_pos1.pkl"), "rb"))
     
     mcw = pickle.load(open(Path(path, "mcw.pkl"), "rb"))
     top20adj = pickle.load(open(Path(path, "top20adj.pkl"), "rb"))
@@ -63,7 +63,7 @@ def get_data(path):
     top_verb = pickle.load(open(Path(path, "top_verb_df.pkl"), "rb"))
     top_pos = pickle.load(open(Path(path, "top_pos_df.pkl"), "rb"))
 
-    return data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos
+    return data, vect, log_i, vect_pos1, svc_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos
     
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
@@ -174,7 +174,7 @@ def load_homepage(data):
     After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
 
     Last thing was to employ various supervised statistical methods, training them on various modification of this dataset. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
-    In particular, they are a <strong>support vector machine</strong> model over a sample of the data balanced with respect to labels and the second one is a <strong>logistic regression</strong> over balanced data but considering only words beloning to specific parts of speech (nouns, proper nouns, verbs, adjectives, pronouns, subordinating conjunction, coordinating conjunction, "other" defined by spacy).
+    In particular, they are a <strong>Logistic Regression</strong> model over a sample of the data balanced with respect to labels and the second one is a <strong>Support Vector Machine</strong> over balanced data but considering only words beloning to specific parts of speech (nouns, proper nouns, verbs, adjectives, pronouns, subordinating conjunction, coordinating conjunction, "other" defined by spacy).
 
     ---
 
@@ -364,21 +364,21 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, t
     ''', unsafe_allow_html=True)
         
 
-def load_classif(data, vect, svc_i, vect_pos, log_pos, nlp):
-    st.write('''
+def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
+    st.markdown('''
     On this page you can test two of the models that have been trained for the project.
     
     In both cases, the lables were balanced with RandomUnderSampler.
     
-    1. Support Vector Machine trained on lemmatized text;
-    2. Logistic Regression over data including only some parts of speech.
+    1. Logistic Regression trained on lemmatized text;
+    2. Support Vector Machine over data including only some parts of speech.
     
-    ''')
+    In particular, the second model takes into account only the following list of parts of speech: composed by nouns, proper nouns, verbs, determinants, adjectives, auxiliaries and pronouns.
     
-    st.write("To do so, you need to write down the sentence you want to test in the board below.")
+    To do so, you need to write down the sentence you want to test in the board below.
     
-    st.write("As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the first method performs better in terms of classification between Hate Speech and Not Hate Speech.")
-    
+    As you cas see, there is a sentence displayed by default. It was choosen since it clearly shows that the two models work differently: in this case, the first method performs better in terms of classification between <strong>Hate Speech</strong> and <strong>Not Hate Speech</strong>.
+    ''', unsafe_allow_html=True)  
     
     written_sent = st.text_input('Write your sentence here:', "I hate all of you!")
 
@@ -391,9 +391,9 @@ def load_classif(data, vect, svc_i, vect_pos, log_pos, nlp):
             warn_lbl = st.empty()
 
         pred_under = hate_predict(
-            [written_sent], vect, svc_i, nlp, filter_pos=False)
+            [written_sent], vect, log_i, nlp, filter_pos=False)
         pred_pos = hate_predict(
-            [written_sent], vect_pos, log_pos, nlp, filter_pos=True)
+            [written_sent], vect_pos1, svc_pos1, nlp, filter_pos=True)
 
         prediction_under, color_under = get_text_color(pred_under)
         prediction_pos, color_pos = get_text_color(pred_pos)
@@ -432,7 +432,7 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, svc_i, vect_pos, log_pos, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos = get_data(DATA_PATH)
+    data, vect, log_i, vect_pos1, svc_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos = get_data(DATA_PATH)
     nlp = load_spacy_model()
     
     if app_mode == "Homepage":
@@ -440,7 +440,7 @@ def main():
     elif app_mode == "Data Exploration":
         load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos)
     elif app_mode == "Classification":
-        load_classif(data, vect, svc_i, vect_pos, log_pos, nlp)
+        load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp)
 
 if __name__ == "__main__":
     main()
