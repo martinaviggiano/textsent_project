@@ -411,7 +411,7 @@ def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
 
     st.markdown("---", unsafe_allow_html=True)
     
-    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in classifying the sentence, while Model 2 detects the label correctly - please, write in the cell '<em>God loves all of us</em>' ",unsafe_allow_html=True)
+    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell '<em>God loves all of us</em>' ",unsafe_allow_html=True)
 
 
 def get_text_color(pred):
