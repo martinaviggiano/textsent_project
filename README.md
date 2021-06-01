@@ -2,7 +2,7 @@
 
 This project is based on the analysis of textual data, with the aim to detect hate speech.
 
-We employed the dataset from the white supremacist Stormfront forum, manually labelled at sentence level. In particular, data were taken from the Github repository hate-speech-dataset by Vicomtech. https://github.com/Vicomtech/hate-speech-dataset
+We employed the dataset from the white supremacist Stormfront forum, manually labelled at sentence level. In particular, data were taken from the Github repository *hate-speech-dataset* by *Vicomtech*. https://github.com/Vicomtech/hate-speech-dataset
 
 ## Note
 
