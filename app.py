@@ -217,7 +217,7 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, t
 
     st.write("You can click on buttons below to display plots and explore data.")
 
-    st.write("Select the plots to display by clicking on the corresponding buttons:")
+    st.markdown("Select the <strong>plots</strong> to display by clicking on the corresponding buttons:", unsafe_allow_html=True)
     
     with st.beta_expander("Labels frequency"):
          st.plotly_chart(
@@ -292,7 +292,7 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, t
         
 
     
-    st.write("Select the tables to display by clicking on the corresponding buttons:")
+    st.markdown("Select the <strong>tables</strong> to display by clicking on the corresponding buttons:", unsafe_allow_html=True)
     
     with st.beta_expander("Top 20 Words table"):
         st.dataframe(top_words)
@@ -370,8 +370,8 @@ def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
     
     In both cases, the lables were balanced with RandomUnderSampler.
     
-    1. Logistic Regression trained on lemmatized text;
-    2. Support Vector Machine over data including only some parts of speech.
+    1. <em>Logistic Regression</em> trained on lemmatized text;
+    2. <em>Support Vector Machine</em> over data including only some parts of speech.
     
     In particular, the second model takes into account only the following list of parts of speech: composed by nouns, proper nouns, verbs, determinants, adjectives, auxiliaries and pronouns.
     
@@ -399,14 +399,19 @@ def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
         prediction_pos, color_pos = get_text_color(pred_pos)
 
         st.markdown(
-            "<h3><strong>Model with Undersampled data</strong></h3>", unsafe_allow_html=True)
+            "<h3><strong>Model 1: Logistic Regression trained on Lemmatized text</strong></h3>", unsafe_allow_html=True)
         st.markdown(
             f'The sentence has been classified as: <span style="color:{color_under}">**{prediction_under}**</span>', unsafe_allow_html=True)
 
         st.markdown(
-            "<h3><strong>Model containing only some Parts of speech</h3></strong>", unsafe_allow_html=True)
+            "<h3><strong>Model 2: Support Vector Machine including only some Parts of Speech</h3></strong>", unsafe_allow_html=True)
         st.markdown(
             f'The sentence has been classified as: <span style="color:{color_pos}">**{prediction_pos}**</span>', unsafe_allow_html=True)
+   
+
+    st.markdown("---", unsafe_allow_html=True)
+    
+    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in classifying the sentence, while Model 2 detects the label correctly - please, write in the cell '<em>God loves all of us</em>' ",unsafe_allow_html=True)
 
 
 def get_text_color(pred):
