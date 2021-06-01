@@ -49,7 +49,7 @@ def get_data(path):
     vect = pickle.load(open(Path(path, "vect.pkl"), "rb"))
     log_i = pickle.load(open(Path(path, "log_i.pkl"), "rb"))
     vect_pos1 = pickle.load(open(Path(path, "vect_pos1.pkl"), "rb"))
-    svc_pos1 = pickle.load(open(Path(path, "svc_pos1.pkl"), "rb"))
+    log_pos1 = pickle.load(open(Path(path, "log_pos1.pkl"), "rb"))
     
     mcw = pickle.load(open(Path(path, "mcw.pkl"), "rb"))
     top20adj = pickle.load(open(Path(path, "top20adj.pkl"), "rb"))
@@ -63,7 +63,7 @@ def get_data(path):
     top_verb = pickle.load(open(Path(path, "top_verb_df.pkl"), "rb"))
     top_pos = pickle.load(open(Path(path, "top_pos_df.pkl"), "rb"))
 
-    return data, vect, log_i, vect_pos1, svc_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos
+    return data, vect, log_i, vect_pos1, log_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos
     
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
@@ -143,7 +143,7 @@ def full_text_clean(text, nlp, filter_pos):
 def filter_text_pos(x):
     final_pos_text = []
     for elem in x:
-        for pos in ["NOUN", "PROPN", "VERB", "ADJ", "PRON", "SCONJ", "ADP", "CCONJ", "X"]:
+        for pos in ["NOUN" ,  "VERB" ,  "ADJ",  "PRON", "PROPN"]:
             if elem.pos_ == pos:
                 final_pos_text.append(elem.text)
 
@@ -174,7 +174,7 @@ def load_homepage(data):
     After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
 
     Last thing was to employ various supervised statistical methods, training them on various modification of this dataset. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
-    In particular, they are a <strong>Logistic Regression</strong> model over a sample of the data balanced with respect to labels and the second one is a <strong>Support Vector Machine</strong> over balanced data but considering only words beloning to specific parts of speech (nouns, proper nouns, verbs, adjectives, pronouns, subordinating conjunction, coordinating conjunction, "other" defined by spacy).
+    In particular, they are a <strong>Logistic Regression</strong> model over a sample of the data balanced with respect to labels and the second one is a <strong>Logistic Regression</strong> over balanced data but considering only words beloning to specific parts of speech (nouns, proper nouns, verbs, adjectives, pronouns, subordinating conjunction, coordinating conjunction, "other" defined by spacy).
 
     ---
 
@@ -364,14 +364,14 @@ def load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, t
     ''', unsafe_allow_html=True)
         
 
-def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
+def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
     st.markdown('''
     On this page you can test two of the models that have been trained for the project.
     
     In both cases, the lables were balanced with RandomUnderSampler.
     
-    1. <em>Logistic Regression</em> trained on lemmatized text;
-    2. <em>Support Vector Machine</em> over data including only some parts of speech.
+    1. <em>Logistic Regression</em> trained on cleaned text;
+    2. <em>Logistic Regression</em> over data including only some parts of speech.
     
     In particular, the second model takes into account only the following list of parts of speech: composed by nouns, proper nouns, verbs, determinants, adjectives, auxiliaries and pronouns.
     
@@ -393,25 +393,25 @@ def load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp):
         pred_under = hate_predict(
             [written_sent], vect, log_i, nlp, filter_pos=False)
         pred_pos = hate_predict(
-            [written_sent], vect_pos1, svc_pos1, nlp, filter_pos=True)
+            [written_sent], vect_pos1, log_pos1, nlp, filter_pos=True)
 
         prediction_under, color_under = get_text_color(pred_under)
         prediction_pos, color_pos = get_text_color(pred_pos)
 
         st.markdown(
-            "<h3><strong>Model 1: Logistic Regression trained on Lemmatized text</strong></h3>", unsafe_allow_html=True)
+            "<h3><strong>Model 1: Logistic Regression trained on Cleaned text</strong></h3>", unsafe_allow_html=True)
         st.markdown(
             f'The sentence has been classified as: <span style="color:{color_under}">**{prediction_under}**</span>', unsafe_allow_html=True)
 
         st.markdown(
-            "<h3><strong>Model 2: Support Vector Machine including only some Parts of Speech</h3></strong>", unsafe_allow_html=True)
+            "<h3><strong>Model 2: Logistic Regression including only some Parts of Speech</h3></strong>", unsafe_allow_html=True)
         st.markdown(
             f'The sentence has been classified as: <span style="color:{color_pos}">**{prediction_pos}**</span>', unsafe_allow_html=True)
    
 
     st.markdown("---", unsafe_allow_html=True)
     
-    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell '<em>God loves all of us</em>' ",unsafe_allow_html=True)
+    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>I don't think I am racist, but I still hate black people.</em>' ",unsafe_allow_html=True)
 
 
 def get_text_color(pred):
@@ -437,7 +437,7 @@ def main():
         "Go to:", ["Homepage", "Data Exploration", "Classification"]
     )
     
-    data, vect, log_i, vect_pos1, svc_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos = get_data(DATA_PATH)
+    data, vect, log_i, vect_pos1, log_pos1, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos = get_data(DATA_PATH)
     nlp = load_spacy_model()
     
     if app_mode == "Homepage":
@@ -445,7 +445,7 @@ def main():
     elif app_mode == "Data Exploration":
         load_eda(data, mcw, top20adj, top20noun, top20propn, top20verb, top_words, top_adj, top_noun, top_propn, top_verb, top_pos)
     elif app_mode == "Classification":
-        load_classif(data, vect, log_i, vect_pos1, svc_pos1, nlp)
+        load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp)
 
 if __name__ == "__main__":
     main()
