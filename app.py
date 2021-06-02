@@ -174,7 +174,7 @@ def load_homepage(data):
     After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
 
     Last thing was to employ various supervised statistical methods, training them on various modification of this dataset. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
-    In particular, they are a Logistic Regression model over a <strong>sample of the data balanced</strong> with respect to labels and the second one is a Logistic Regression over balanced data but considering only words beloning to specific <strong>parts of speech</strong> (nouns, verbs, adjectives, pronouns, proper nouns defined by spacy).
+    In particular, they are a Support Vector Machine model over a <strong>sample of the data balanced</strong> with respect to labels and the second one is a Logistic Regression over balanced data but considering only words beloning to specific <strong>parts of speech</strong> (nouns, verbs, adjectives, pronouns, proper nouns defined by spacy).
 
     ---
 
@@ -370,7 +370,7 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
     
     In both cases, the lables were balanced with RandomUnderSampler.
     
-    1. <em>Logistic Regression</em> trained on Lemmatized text;
+    1. <em>Support Vector Machine</em> trained on Lemmatized text;
     2. <em>Logistic Regression</em> over data including only some parts of speech.
     
     In particular, the second model takes into account only the following list of parts of speech: composed by nouns, proper nouns, verbs, determinants, adjectives, auxiliaries and pronouns.
@@ -399,7 +399,7 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
         prediction_pos, color_pos = get_text_color(pred_pos)
 
         st.markdown(
-            "<h3><strong>Model 1: Logistic Regression trained on Lemmatized text</strong></h3>", unsafe_allow_html=True)
+            "<h3><strong>Model 1: Support Vector Machine trained on Lemmatized text</strong></h3>", unsafe_allow_html=True)
         st.markdown(
             f'The sentence has been classified as: <span style="color:{color_under}">**{prediction_under}**</span>', unsafe_allow_html=True)
 
@@ -411,8 +411,9 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
 
     st.markdown("---", unsafe_allow_html=True)
     
-    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>I don't think I am racist, but I still hate black people.</em>' ",unsafe_allow_html=True)
-
+    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>They are sick violent merciless animals.</em>' ",unsafe_allow_html=True)
+    
+    st.markdown("Disclaimer: the examples used in the project are inspired by the sentences in the dataset itself. Some changes were made to disguise the sentences and alter the appearance, to make it less easy for the models to classify them.", unsafe_allow_html=True)
 
 def get_text_color(pred):
     if pred == 0:
