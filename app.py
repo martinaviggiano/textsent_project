@@ -411,7 +411,7 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
 
     st.markdown("---", unsafe_allow_html=True)
     
-    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>They are sick violent merciless animals.</em>' ",unsafe_allow_html=True)
+    st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>They are sick violent merciless animals</em>'. ",unsafe_allow_html=True)
     
     st.markdown("Disclaimer: the examples used in the project are inspired by the sentences in the dataset itself. Some changes were made to disguise the sentences and alter the appearance, to make it less easy for the models to classify them.", unsafe_allow_html=True)
 
