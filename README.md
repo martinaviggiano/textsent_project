@@ -13,6 +13,7 @@ The work has been split in 3 pages:
 3. *Models* in which we porformed different statistic methods on data. 
 
 ## Usage
+To open the *Streamlit* dashboard, please run the following code.
 
 ```bash
 pip install -r requirements.txt
