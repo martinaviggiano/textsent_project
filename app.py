@@ -10,6 +10,8 @@ import streamlit as st
 from cleantext import clean
 from PIL import Image
 from tensorflow.python.keras.utils.vis_utils import plot_model
+import webbrowser
+
 
 from plots import (
     plot_freq_labels,
@@ -165,8 +167,8 @@ def load_homepage(data):
 
     The dataset considered in the study contains textual data extracted from <em>Stormfront</em>, a white supremacist forum.
 
-    In particular, data were taken from the Github repository <em>hate-speech-dataset</em> by Vicomtech, in which a list of sentences from a random set of forums posts is provided.
-
+    In particular, data were taken from the Github repository [hate-speech-dataset] by <em>Vicomtech</em>, in which a list of sentences from a random set of forums posts is provided.
+    
     A few number of variables are assigned to each of the sentences, including the label of interest: for every sentence, the dataset provides the column <em>label</em> which shows whether it has been classified as hate speech (1) or not hate speech (0).
 
     The first step was to clean deeply textual data; we faced some difficulties working with this dataset, since it turned out to be full of contractions and entities that created some bias, so had to be removed.
@@ -174,6 +176,7 @@ def load_homepage(data):
     After that, we perfomed several types of analysis on the data: we derived the most common words and also with respect to some characteristics of the words themselves, such as part of speech or the fact of being used in a sentence classified as hate speech.
 
     Last thing was to employ various supervised statistical methods, training them on various modification of this dataset. Among them, we selected two models that seem to better perform classification in terms of precision and f1 score.
+    
     In particular, they are a Support Vector Machine model over a <strong>sample of the data balanced</strong> with respect to labels and the second one is a Logistic Regression over balanced data but considering only words beloning to specific <strong>parts of speech</strong> (nouns, verbs, adjectives, pronouns, proper nouns defined by spacy).
 
     ---
@@ -185,6 +188,8 @@ def load_homepage(data):
     On <strong>Data Exploration</strong> page you can use interactive tools to display plots and visualize data.
 
     On <strong>Classification</strong> page you can take advantage of the two trained model described above by writing a sentence on which you want to test the classification accuracy.
+    
+    [hate-speech-dataset]: <https://github.com/Vicomtech/hate-speech-dataset>
     ''', unsafe_allow_html = True)
     
    
@@ -368,12 +373,12 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
     st.markdown('''
     On this page you can test two of the models that have been trained for the project.
     
-    In both cases, the lables were balanced with RandomUnderSampler.
+    In both cases, the lables were balanced with <em>RandomUnderSampler</em>.
     
-    1. <em>Support Vector Machine</em> trained on Lemmatized text;
-    2. <em>Logistic Regression</em> over data including only some parts of speech.
+    1. <ins><em>Support Vector Machine</em></ins> trained on Lemmatized text;
+    2. <ins><em>Logistic Regression</em></ins> over data including only some parts of speech.
     
-    In particular, the second model takes into account only the following list of parts of speech: composed by nouns, proper nouns, verbs, determinants, adjectives, auxiliaries and pronouns.
+    In particular, the second model takes into account only the following list of parts of speech: composed of nouns, proper nouns, verbs, adjectives, pronouns and proper nouns.
     
     To do so, you need to write down the sentence you want to test in the board below.
     
@@ -413,7 +418,7 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
     
     st.markdown("If you want to display the opposite effect - i.e. Model 1 failing in sentence classification, while Model 2 detects the label correctly - please, write in the cell above '<em>They are sick violent merciless animals</em>'. ",unsafe_allow_html=True)
     
-    st.markdown("Disclaimer: the examples used in the project are inspired by the sentences in the dataset itself. Some changes were made to disguise the sentences and alter the appearance, to make it less easy for the models to classify them.", unsafe_allow_html=True)
+    st.markdown("<ins>Disclaimer</ins>: The examples used in the project are inspired by the sentences in the dataset itself. Some changes were made to disguise the sentences and alter the appearance, to make it less easy for the models to classify them.", unsafe_allow_html=True)
 
 def get_text_color(pred):
     if pred == 0:
