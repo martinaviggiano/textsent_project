@@ -378,7 +378,7 @@ def load_classif(data, vect, log_i, vect_pos1, log_pos1, nlp):
     1. <ins><em>Support Vector Machine</em></ins> trained on Lemmatized text;
     2. <ins><em>Logistic Regression</em></ins> over data including only some parts of speech.
     
-    In particular, the second model takes into account only the following list of parts of speech: composed of nouns, proper nouns, verbs, adjectives, pronouns and proper nouns.
+    In particular, the second model takes into account only the following list of parts of speech: composed of nouns, proper nouns, verbs, adjectives and pronouns.
     
     To do so, you need to write down the sentence you want to test in the board below.
     
