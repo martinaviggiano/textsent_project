@@ -93,7 +93,7 @@ def plot_top_20_pos(df, x_col="", title="", template="plotly"):
         go.Bar(
             x=df[x_col],
             y=df.Freq_No_Hate,
-            name="Freq. tot.",
+            name="Freq. Not Hate Speech",
             yaxis="y",
             offsetgroup=1,
             marker_color="lightblue",
